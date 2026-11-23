@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Splagent: 3DGS-Guided Agentic Reconstruction of Indoor Scenes</title>
+<meta name="description" content="Splagent uses vision-language agents and a shared 3D Gaussian Splatting scene to discover and reconstruct indoor scenes as compositional, editable assets.">
+<style>
+:root{
+  --bg:#ffffff; --fg:#1a1d1f; --muted:#5c6670; --line:#e3e7ea; --card:#f6f8f9;
+  --accent:#1f7a5c; --accent-soft:#e0eee8; --ours:#e1e2ea;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#101314;--fg:#e8ecee;--muted:#9aa5ad;--line:#262c30;--card:#171b1d;--accent:#4cc79d;--accent-soft:#17302a;--ours:#262838}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header.hero{padding:40px 0 32px;text-align:center}.logo{display:block;margin:0 auto 14px;width:min(320px,70vw);height:auto}
+.hero h1{font-size:clamp(28px,5vw,46px);line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}
+.hero h1 span{color:var(--accent)}
+.tag{color:var(--muted);font-size:19px;max-width:760px;margin:0 auto 22px}
+.authors{color:var(--muted);font-size:16px;line-height:1.8;margin-bottom:22px}.authors sup{font-size:.7em}.authors a{color:inherit;border-bottom:1px dotted var(--muted)}.authors a:hover{color:var(--accent);text-decoration:none}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:999px;background:var(--fg);color:var(--bg);font-weight:600;font-size:15px}
+.btn:hover{text-decoration:none;opacity:.85}
+.btn.off{background:var(--card);color:var(--muted);border:1px solid var(--line);pointer-events:none}
+section{padding:44px 0;border-top:1px solid var(--line)}
+section.first{border-top:0;padding-top:8px}
+.eyebrow{font:600 13px/1 ui-monospace,Menlo,monospace;color:var(--accent);letter-spacing:.08em;margin-bottom:8px}
+h2{font-size:28px;margin:0 0 16px;letter-spacing:-.01em}
+p{margin:0 0 14px}
+.abstract{max-width:860px;margin:0 auto}
+figure{margin:0}
+figure img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line)}
+#framework figure img{border:0;border-radius:0;background:transparent;cursor:zoom-in}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #framework figure img{background:#fff;border-radius:12px;padding:8px}}
+figcaption{color:var(--muted);font-size:14.5px;margin-top:8px}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card b{display:block;margin-bottom:4px}
+.card span{color:var(--muted);font-size:15px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:6px 14px;border-radius:999px;font:inherit;font-size:14px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.stage{position:relative}
+.stage .lab{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.65);color:#fff;font-size:13px;padding:3px 10px;border-radius:999px}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-weight:600;color:var(--muted);font-size:13.5px}
+tr.ours td{background:var(--ours);font-weight:600}
+.scroll{overflow-x:auto}
+.cmp2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.5;margin:0}
+.copy{margin-top:10px}
+footer{padding:36px 0 60px;color:var(--muted);font-size:14px;text-align:center;border-top:1px solid var(--line)}
+@media(max-width:760px){.g3,.g4,.cards{grid-template-columns:1fr 1fr}.cmp2{grid-template-columns:1fr}}
+@media(max-width:480px){.g3,.g4,.cards,.g2{grid-template-columns:1fr}}
+
+/* interactive pipeline */
+.pipe{--vlm:#7f84ab;--sam:#7fb894;--dat:#efc9bd;--dat-b:#cf9a89;--fb:#b5735d;--st:#3f6b5c;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pipe{--vlm:#9a9fd0;--dat:#4a3a36;--dat-b:#8a6a5e;--fb:#e09a82;--st:#4cc79d}}
+.pflow{display:flex;align-items:center;gap:8px}
+.pin,.pout{flex:0 0 auto;text-align:center;font-size:13px;color:var(--muted);line-height:1.2}
+.pin .im{display:flex;gap:4px;margin-bottom:4px}.pin img,.pout img{height:58px;width:auto;border-radius:6px;border:0;background:transparent}
+.pout img{height:74px}
+.parr{color:var(--muted);flex:0 0 auto;font-size:18px}
+.psts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex:1;min-width:0}
+.pst{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:12px;padding:10px 12px;cursor:pointer;display:flex;gap:9px;align-items:center;transition:transform .15s,box-shadow .15s,border-color .15s}
+.pst:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.pst i{font-style:normal;flex:0 0 auto;width:26px;height:26px;border-radius:7px;background:var(--st);color:#fff;font-weight:700;display:grid;place-items:center;font-size:14px}
+.pst b{font-size:14px;line-height:1.25;font-weight:600}
+.pst[aria-selected="true"]{border-color:var(--st);box-shadow:0 0 0 2px var(--st) inset}
+.pprog{height:3px;background:var(--line);border-radius:3px;margin:12px 0 14px;overflow:hidden}
+.pprog span{display:block;height:100%;width:25%;background:var(--st);border-radius:3px;transition:margin-left .35s}
+.ppanel{display:grid;grid-template-columns:1fr 230px;gap:18px;min-height:300px}
+.ppanel h3{margin:0 0 4px;font-size:20px}
+.ppanel .d{color:var(--muted);font-size:15px;margin:0 0 12px}
+.lane{margin:0 0 12px}.lane h4{margin:0 0 6px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px 4px}
+.nd{display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 12px 4px 8px;font-size:14px;opacity:0;transform:translateY(6px);animation:pin .4s forwards}
+.nd:before{content:"";width:13px;height:13px;border-radius:50%;border:2px solid var(--fg);background:var(--bg);flex:0 0 auto}
+.nd.v:before{background:var(--vlm);border-color:var(--vlm)}
+.nd.s:before{background:var(--sam);border-color:#4d9a6d}
+.nd.p:before{background:var(--bg);border-color:var(--fg)}
+.nd.dia:before{border-radius:2px;transform:rotate(45deg);background:var(--vlm);border-color:var(--vlm)}
+.dt{display:inline-block;background:var(--dat);border:1px solid var(--dat-b);border-radius:4px 10px 4px 4px;padding:3px 10px;font-size:13.5px;opacity:0;animation:pin .4s forwards}
+.cn{color:var(--muted);opacity:0;animation:pin .4s forwards}
+.fbs{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.fb{border:1.5px solid var(--fb);color:var(--fb);border-radius:999px;padding:3px 12px;font-size:13.5px;width:fit-content;max-width:100%;opacity:0;animation:pin .4s forwards}
+.fb:before{content:"\21BA  "}
+@keyframes pin{to{opacity:1;transform:none}}
+.pside{display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;font-size:13px;color:var(--muted)}
+.pside img{width:100%;height:auto;border-radius:8px;background:transparent;border:0}
+.plegend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.plegend span{display:inline-flex;align-items:center;gap:6px}
+.plegend a{margin-left:auto}
+@media(max-width:760px){.pflow{flex-wrap:wrap}.psts{grid-template-columns:1fr 1fr;order:3;flex-basis:100%}.parr{display:none}.ppanel{grid-template-columns:1fr}.pside{flex-direction:row}.pside img{max-width:220px}}
+@media (prefers-reduced-motion: reduce){.nd,.dt,.cn,.fb{animation:none;opacity:1;transform:none}}
+/* mesh load gate */
+.mvdet>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:1fr auto;align-items:center;gap:0 12px;padding:2px 0}
+.mvdet>summary::-webkit-details-marker{display:none}
+.mvdet>summary .eyebrow{grid-column:1;display:block}
+.mvdet>summary .mvh{grid-column:1;font-size:28px;font-weight:700;line-height:1.25}
+.mvdet>summary .mvhint{grid-column:2;grid-row:1/3;align-self:center;font-size:14px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 14px;background:var(--card)}
+.mvdet>summary .mvhint:after{content:" \25BE"}
+.mvdet[open]>summary .mvhint:after{content:" \25B4"}
+.mvdet[open]>summary .mvhint{font-size:0}.mvdet[open]>summary .mvhint:before{content:"Collapse";font-size:14px}
+.mvdet>summary:hover .mvhint{border-color:var(--accent);color:var(--accent)}
+.mvdet[open]>summary{margin-bottom:10px}
+.mvbox{position:relative;width:100%;height:min(70vh,640px);background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.mvgate{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(ellipse at 50% 40%,var(--accent-soft),var(--card) 70%);transition:opacity .3s}
+.mvgate small{color:var(--muted);font-size:13px}
+.mvbtn{font:inherit;font-size:16px;font-weight:600;border:0;border-radius:999px;padding:13px 26px;background:var(--fg);color:var(--bg);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:transform .15s}
+.mvbtn:hover{transform:translateY(-2px)}.mvbtn span{font-weight:400;opacity:.75;font-size:14px}
+.mvprog{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;font-size:13px;color:var(--muted);background:linear-gradient(transparent,var(--card) 60%)}
+.mvprog i{display:block;height:3px;width:0;background:var(--accent);border-radius:3px;margin-bottom:6px;transition:width .2s}
+.mvgate.off{opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <img class="logo" src="assets/logo.png" alt="Splagent logo">
+  <h1><span>Splagent</span>: 3DGS-Guided Agentic Discovery and Reconstruction of Compositional Indoor Scenes</h1>
+  <div class="authors"><a href="https://xuqianren.github.io" target="_blank" rel="noopener">Xuqian Ren</a><sup>1</sup> &middot; <a href="https://lifuguan.github.io" target="_blank" rel="noopener">Hao Li</a><sup>2,3</sup> &middot; <a href="https://dai818.github.io" target="_blank" rel="noopener">Yalun Dai</a><sup>2,3</sup> &middot; <a href="https://hongfz16.github.io" target="_blank" rel="noopener">Fangzhou Hong</a><sup>2,3</sup> &middot; <a href="https://frozenburning.github.io" target="_blank" rel="noopener">Zhaoxi Chen</a><sup>2,3</sup> &middot; Kim-Hui Yap<sup>2</sup> &middot; <a href="https://users.aalto.fi/~kannalj1/" target="_blank" rel="noopener">Juho Kannala</a><sup>4,5</sup> &middot; <a href="https://wuminye.github.io" target="_blank" rel="noopener">Minye Wu</a><sup>6</sup> &middot; <a href="https://liuziwei7.github.io/" target="_blank" rel="noopener">Ziwei Liu</a><sup>2,3</sup><br><sup>1</sup>Tampere University &nbsp; <sup>2</sup>Nanyang Technological University &nbsp; <sup>3</sup>Ropedia &nbsp; <sup>4</sup>University of Oulu &nbsp; <sup>5</sup>Aalto University &nbsp; <sup>6</sup>University of Derby</div>
+  <div class="btns">
+    <a class="btn off" href="#">Paper (soon)</a>
+    <a class="btn off" href="#">arXiv (soon)</a>
+    <a class="btn off" href="#">Code (soon)</a>
+  </div>
+</header>
+
+<section class="first">
+  <style>
+.tz{--W:2292;--H:1067;display:grid;grid-template-columns:minmax(250px,27%) 1fr;gap:18px;align-items:stretch}
+.tz-l,.tz-r{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.tz-l{position:relative;min-height:0}.tz-li{position:absolute;left:0;top:0;box-sizing:border-box;padding:16px 16px 14px;display:flex;flex-direction:column;gap:12px;transform-origin:0 0}
+@media(max-width:820px){.tz-li{position:static;width:auto!important;transform:none!important;height:auto!important}}
+.tz h3{margin:0;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.tz-th{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tz-th figure{margin:0;text-align:center;font-size:12.5px;color:var(--muted)}
+.tz-th .cr{width:100%;border-radius:8px;background-color:#fff;border:1px solid var(--line)}
+.cr{background-image:url(assets/teaser.png);background-repeat:no-repeat}
+.tz-bars{display:flex;flex-direction:column;gap:7px}
+.tz-bar{display:grid;grid-template-columns:104px 1fr 34px;align-items:center;gap:8px;font-size:13px}
+.tz-bar i{display:block;height:14px;border-radius:7px;background:#8fb5a2;width:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1);position:relative;overflow:hidden}
+.tz-bar i b{position:absolute;left:0;top:0;bottom:0;background:#e6c987;width:0;transition:width 1.1s .15s cubic-bezier(.2,.8,.2,1)}
+.tz-bar.ours{font-weight:700}.tz-bar.ours i{background:#3f6b5c}
+.tz-bar em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.tz-key{font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:center}.tz-key s{display:inline-block;width:10px;height:10px;border-radius:3px;text-decoration:none;margin-right:4px;vertical-align:-1px}
+.tz-small{margin-top:auto;border-radius:12px;background:#f6e7e3;color:#8a4a3a;padding:10px 14px;font-size:14px}
+.tz-small b{font-size:22px;font-variant-numeric:tabular-nums}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tz-small{background:#3a2824;color:#e8b4a4}}
+.tz-r{position:relative;background:#fff;perspective:1400px}
+.tz-stage{position:relative;transition:transform .25s ease-out;transform-style:preserve-3d;will-change:transform}
+.tz-stage{container-type:inline-size}.tz-stage .cr{width:100%;display:block}
+.tz-ttl{position:absolute;left:43.2%;width:13.4%;top:.4%;height:5.5%;background:#446e64;color:#fff;display:flex;align-items:center;justify-content:center;font:700 2.25cqw/1 Helvetica,Arial,sans-serif;pointer-events:none}
+.tz-hs{position:absolute;border:2px solid transparent;border-radius:12px;cursor:pointer;background:transparent;padding:0;transition:box-shadow .2s,border-color .2s,background .2s}
+.tz-hs:hover,.tz-hs:focus-visible{border-color:#3f6b5c;box-shadow:0 0 0 4px rgba(63,107,92,.22),0 10px 30px rgba(0,0,0,.18);background:rgba(63,107,92,.06);outline:none}
+.tz-hs span{position:absolute;right:8px;bottom:8px;background:#3f6b5c;color:#fff;font-size:11.5px;line-height:1;padding:5px 9px;border-radius:999px;opacity:0;transform:translateY(4px);transition:.2s;pointer-events:none}
+.tz-hs:hover span,.tz-hs:focus-visible span{opacity:1;transform:none}
+.tz-hint{position:absolute;left:14px;bottom:12px;font-size:12.5px;background:rgba(26,29,31,.78);color:#fff;padding:5px 12px;border-radius:999px;pointer-events:none;animation:tzp 2.4s ease-in-out infinite}
+@keyframes tzp{50%{opacity:.55}}
+.tz-reveal{opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s}
+.tz-reveal.on{opacity:1;transform:none}
+dialog.tz-dlg{border:0;border-radius:16px;padding:0;max-width:min(92vw,880px);width:100%;background:var(--bg);color:var(--fg);box-shadow:0 30px 80px rgba(0,0,0,.4)}
+dialog.tz-dlg::backdrop{background:rgba(10,14,16,.6);backdrop-filter:blur(3px)}
+.tz-dlg .cr{width:100%;background-color:#fff}
+.tz-dlg .bd{padding:16px 20px 20px}.tz-dlg h4{margin:0 0 4px;font-size:18px}.tz-dlg p{margin:0;color:var(--muted);font-size:15px}
+.tz-dlg button.x{position:absolute;right:10px;top:10px;border:0;background:rgba(0,0,0,.55);color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer}
+@media(max-width:820px){.tz{grid-template-columns:1fr}.tz-hint{display:none}}
+@media (prefers-reduced-motion: reduce){.tz-stage,.tz-bar i,.tz-bar i b,.tz-reveal{transition:none}.tz-hint{animation:none}}
+</style>
+<div class="tz" id="tz">
+  <div class="tz-l tz-reveal"><div class="tz-li" id="tzli">
+    <h3>Compared methods</h3>
+    <div class="tz-th">
+      <figure><div class="cr" data-c="10,62,272,205"></div>ShapeR</figure>
+      <figure><div class="cr" data-c="284,62,268,205"></div>Fire3D</figure>
+      <figure><div class="cr" data-c="14,332,264,200"></div>LiteReality-Agent</figure>
+      <figure><div class="cr" data-c="284,332,268,200"></div>GPT Astra</figure>
+    </div>
+    <h3>Objects correctly found</h3>
+    <div class="tz-bars" id="tzb"></div>
+    <div class="tz-key"><span><s style="background:#8fb5a2"></s>all objects</span><span><s style="background:#e6c987"></s>of which small</span></div>
+    <div class="tz-small">Small objects only &mdash; found: <b data-n="1">0</b> at most; ours <b data-n="29">0</b></div>
+  </div></div>
+  <div class="tz-r tz-reveal">
+    <div class="tz-stage" id="tzs"><div class="cr" data-c="570,0,1722,1067" id="tzm"></div><div class="tz-ttl">Splagent</div></div>
+    <div class="tz-hint">Click a panel to zoom in</div>
+  </div>
+</div>
+<dialog class="tz-dlg" id="tzd"><button class="x" aria-label="Close">&times;</button><div class="cr" id="tzdc"></div><div class="bd"><h4 id="tzdt"></h4><p id="tzdp"></p></div></dialog>
+<script>
+(function(){
+  var W=2292,H=1067;
+  function crop(el,r){el.style.aspectRatio=r[2]+'/'+r[3];el.style.backgroundSize=(W/r[2]*100)+'% auto';el.style.backgroundPosition=(W>r[2]?r[0]/(W-r[2])*100:0)+'% '+(H>r[3]?r[1]/(H-r[3])*100:0)+'%'}
+  document.querySelectorAll('#tz .cr[data-c]').forEach(function(e){crop(e,e.dataset.c.split(',').map(Number))});
+  var X0=570,SW=1722;
+  var P=[
+   {k:'a',r:[1090,75,485,260],t:'a · Procedural fallback',p:'A generated lamp comes out too wide for the photo, so the system falls back to procedural construction, which matches the observation.'},
+   {k:'b',r:[1888,75,374,225],t:'b · Small object (17 cm)',p:'A small object found in a close-up is rebuilt and checked against the photo.'},
+   {k:'c',r:[1090,795,505,260],t:'c · Wrong mesh: reselect views',p:'Attempt 1 produced an extra sheet; the agent reselects the views and attempt 2 removes it.'},
+   {k:'d',r:[1667,795,580,260],t:'d · Views rendered from the GS: pass',p:'Four GS renders with masks drive the generated mesh, which then matches the same camera view.'}];
+  var st=document.getElementById('tzs'),dlg=document.getElementById('tzd'),dc=document.getElementById('tzdc');
+  P.forEach(function(o){
+    var b=document.createElement('button');b.className='tz-hs';b.setAttribute('aria-label',o.t);
+    b.style.cssText='left:'+((o.r[0]-X0)/SW*100)+'%;top:'+(o.r[1]/H*100)+'%;width:'+(o.r[2]/SW*100)+'%;height:'+(o.r[3]/H*100)+'%';
+    b.innerHTML='<span>Zoom &#8599;</span>';
+    b.onclick=function(){crop(dc,o.r);document.getElementById('tzdt').textContent=o.t;document.getElementById('tzdp').textContent=o.p;if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','')};
+    st.appendChild(b)});
+  dlg.addEventListener('click',function(e){if(e.target===dlg||e.target.className==='x')dlg.close()});
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){var r=st.parentNode;r.addEventListener('mousemove',function(e){var b=r.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;st.style.transform='rotateY('+(x*3)+'deg) rotateX('+(-y*3)+'deg)'});r.addEventListener('mouseleave',function(){st.style.transform=''})}
+  var D=[['Fire3D',26,0],['LiteReality-Agent',28,0],['ShapeR',32,1],['WorldSculpt',40,1],['GPT Astra',43,1],['Ours',104,29]],box=document.getElementById('tzb');
+  D.forEach(function(d){var o=d[0]=='Ours',e=document.createElement('div');e.className='tz-bar'+(o?' ours':'');e.innerHTML='<span>'+d[0]+'</span><div><i data-w="'+d[1]/104*100+'" data-s="'+d[2]/104*100+'"><b></b></i></div><em data-n="'+d[1]+'">0</em>';box.appendChild(e)});
+  function count(el){var n=+el.dataset.n,t=0,s=performance.now();if(reduce){el.textContent=n;return}(function f(now){t=Math.min(1,(now-s)/1100);el.textContent=Math.round(n*(1-Math.pow(1-t,3)));if(t<1)requestAnimationFrame(f)})(s)}
+  function play(){document.querySelectorAll('#tzb i').forEach(function(i){i.style.width=i.dataset.w+'%';i.firstChild.style.width=(i.dataset.s/i.dataset.w*100)+'%'});document.querySelectorAll('#tz [data-n]').forEach(count)}
+  var li=document.getElementById('tzli'),lb=li.parentNode,rb=document.querySelector('#tz .tz-r');
+  function fit(){
+    li.style.transform='';li.style.height='';
+    if(window.matchMedia('(max-width:820px)').matches){li.style.width='';return}
+    var w=lb.clientWidth,rh=rb.clientHeight,s=1;
+    li.style.width=w+'px';li.style.height='auto';
+    for(var i=0;i<3;i++){var h=li.offsetHeight;s=Math.max(.55,Math.min(1.25,rh/h));li.style.width=(w/s)+'px'}
+    li.style.height=(rh/s)+'px';li.style.transform='scale('+s+')';
+  }
+  fit();addEventListener('resize',fit);addEventListener('load',fit);
+  if(window.ResizeObserver)new ResizeObserver(fit).observe(rb);
+  var els=document.querySelectorAll('#tz .tz-reveal'),done=false;
+  function on(){els.forEach(function(e){e.classList.add('on')});if(!done){done=true;setTimeout(play,250)}}
+  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(e){if(e[0].isIntersecting){on();io.disconnect()}},{threshold:.2});io.observe(document.getElementById('tz'))}else on();
+})();
+</script>
+
+  <p style="color:var(--muted);font-size:14px;text-align:center;margin:12px 0 0">From posed images and a 3DGS scene to a compositional indoor scene made of individual objects.</p>
+</section>
+
+<section>
+  <div class="eyebrow">ABSTRACT</div>
+  <div class="abstract">
+  <p>Object-level reconstruction allows individual objects in an indoor scene to be edited and manipulated independently. Yet existing methods often miss objects that are visible in the input images, particularly small objects that appear in only a few views. We present Splagent, an agentic framework that uses a shared 3D Gaussian Splatting (3DGS) scene to reconstruct indoor environments as collections of compositional assets.</p>
+  <p>Its vision-language agents search calibrated images for objects, using full-resolution close-ups to help identify small instances. They use the scene geometry to associate detections across views and reconcile them with a scene-level layout inventory. The resulting inventory links each object to its supporting observations and a measured 3D bounding box, guiding procedural construction and mesh generation. When a generated asset fails verification against the source observations, the framework can revisit the same Gaussian scene to adjust its placement, remeasure its box, or render alternative views for regeneration.</p>
+  <p>On ScanNet++ and our captured indoor scenes, Splagent outperforms the evaluated multi-view baselines in both overall and small-object recovery. The full pipeline also produces more accurate reconstruction geometry. In transfer experiments, replacing native proposals with the measured inventory improves foreground reconstruction for some backends.</p>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="eyebrow">DEMO</div>
+  <video controls loop playsinline preload="metadata" poster="assets/demo_poster.png?v=13" style="width:100%;border-radius:10px;border:1px solid var(--line)"><source src="assets/demo.mp4?v=13" type="video/mp4"></video>
+</section>
+
+<section id="framework">
+  <div class="eyebrow">01 &middot; THE FRAMEWORK</div>
+  <h2>Search, measure, build, verify</h2>
+  <div class="pipe" id="pipe">
+    <div class="pflow">
+      <div class="pin"><div class="im"><img src="assets/pipe_rgb.png" alt="RGB images"><img src="assets/pipe_3dgs.png" alt="3DGS"></div>RGB + 3DGS</div>
+      <span class="parr">&rarr;</span>
+      <div class="psts" role="tablist" id="pst"></div>
+      <span class="parr">&rarr;</span>
+      <div class="pout"><img src="assets/pipe_editable.png" alt="Editable scene"><br>Editable scene</div>
+    </div>
+    <div class="pprog"><span id="pprog"></span></div>
+    <div class="ppanel" id="ppanel" aria-live="polite"></div>
+    <div class="plegend"><span><svg width="14" height="14"><circle cx="7" cy="7" r="5.5" fill="#7f84ab"/></svg>VLM</span><span><svg width="14" height="14"><circle cx="7" cy="7" r="5.5" fill="#7fb894" stroke="#4d9a6d" stroke-width="1.5"/></svg>SAM3, MV-SAM3D</span><span><svg width="14" height="14"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>program</span><span><svg width="16" height="14"><path d="M1 2h10l4 4v7H1z" fill="#efc9bd" stroke="#cf9a89"/></svg>data</span><span style="color:var(--fb)">&#8635; feedback or fallback</span></div>
+  </div>
+  <div class="cards" style="margin-top:18px">
+    <div class="card"><b>Agentic search</b><span>Agents scan calibrated images, using full-resolution close-ups to find small instances.</span></div>
+    <div class="card"><b>Inventory</b><span>Detections are associated across views via scene geometry and reconciled with a layout inventory of measured 3D boxes.</span></div>
+    <div class="card"><b>Build &amp; verify</b><span>Procedural construction and mesh generation, checked against source observations; failures return to the 3DGS scene.</span></div>
+  </div>
+</section>
+
+<section id="topdown">
+  <div class="eyebrow">02 &middot; SCENE LAYOUT</div>
+  <h2>Top-down views</h2>
+  <p style="color:var(--muted);font-size:15px">Orthographic top-down layouts of the same scenes: the input 3DGS, GPT Astra, LiteReality-Agent, and ours.</p>
+  <div class="tabs" role="tablist" id="tdtabs"><button class="tab" role="tab" data-case="5" aria-selected="true">ScanNet++ &middot; Scene 1</button><button class="tab" role="tab" data-case="6" aria-selected="false">ScanNet++ &middot; Scene 2</button><button class="tab" role="tab" data-case="2" aria-selected="false">KReal &middot; Scene 1</button><button class="tab" role="tab" data-case="7" aria-selected="false">KReal &middot; Scene 2</button></div>
+  <div class="grid g4" id="tdgrid"><figure><img data-k="3dgs" src="assets/topdown_case5_3dgs.jpg" alt="Input 3DGS"><figcaption>Input 3DGS</figcaption></figure><figure><img data-k="without" src="assets/topdown_case5_without.jpg" alt="GPT Astra"><figcaption>GPT Astra</figcaption></figure><figure><img data-k="lra" src="assets/topdown_case5_lra.jpg" alt="LiteReality-Agent"><figcaption>LiteReality-Agent</figcaption></figure><figure><img data-k="ours" src="assets/topdown_case5_ours.jpg" alt="Ours"><figcaption>Ours</figcaption></figure></div>
+</section>
+
+<section id="meshes">
+  <details class="mvdet">
+    <summary>
+      <span class="eyebrow">03 &middot; EDITABLE SCENES</span>
+      <span class="mvh">Interactive meshes</span>
+      <span class="mvhint">Click to expand</span>
+    </summary>
+  <p style="color:var(--muted);font-size:15px">Textured meshes exported from our final scenes. Drag to rotate, scroll to zoom. Each object is a separate asset.</p>
+  <div class="mvbox" id="mvbox">
+    <model-viewer id="mv" camera-controls touch-action="pan-y" shadow-intensity="0.6" exposure="1.1" interaction-prompt="auto" style="width:100%;height:100%;background:transparent" alt="Reconstructed indoor scene mesh"></model-viewer>
+    <div class="mvgate" id="mvgate">
+      <button class="mvbtn" id="mvload" type="button">Load interactive mesh <span>&middot; ScanNet++ scene &middot; ~101&nbsp;MB</span></button>
+      <small>Not loaded by default to keep this page fast.</small>
+    </div>
+    <div class="mvprog" id="mvprog" hidden><i id="mvbar"></i><span id="mvtxt">Loading 0%</span></div>
+  </div>
+  </details>
+</section>
+
+
+</div>
+<footer>Splagent &middot; project page</footer>
+
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script>
+(function(){
+  var tabs=document.querySelectorAll('#tdtabs .tab'),imgs=document.querySelectorAll('#tdgrid img');
+  var cache=[];
+  function show(c){
+    tabs.forEach(function(t){t.setAttribute('aria-selected',t.dataset.case===c?'true':'false')});
+    imgs.forEach(function(im){im.src='assets/topdown_case'+c+'_'+im.dataset.k+'.jpg'});
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.case)})});
+  ['5','6','2','7'].forEach(function(c){['3dgs','without','lra','ours'].forEach(function(k){var i=new Image();i.src='assets/topdown_case'+c+'_'+k+'.jpg';cache.push(i)})});
+})();
+(function(){
+  var mv=document.getElementById('mv'),gate=document.getElementById('mvgate'),pr=document.getElementById('mvprog'),bar=document.getElementById('mvbar'),tx=document.getElementById('mvtxt');
+  document.getElementById('mvload').addEventListener('click',function(){
+    gate.classList.add('off');pr.hidden=false;
+    mv.addEventListener('progress',function(e){var p=Math.round((e.detail.totalProgress||0)*100);bar.style.width=p+'%';tx.textContent='Loading '+p+'%'});
+    mv.addEventListener('load',function(){pr.hidden=true},{once:true});
+    mv.addEventListener('error',function(){tx.textContent='Failed to load the mesh.';gate.classList.remove('off')},{once:true});
+    mv.src='assets/mesh/scannetpp_2a1b555966.glb?v=11';
+  });
+})();
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script>
+(function(){
+  function tx(s){return s.replace(/\$(.+?)\$/g,function(_,m){try{return window.katex?katex.renderToString(m,{throwOnError:false}):m.replace(/\\mathcal\{(.)\}/,"$1").replace(/_(.)/,"$1")}catch(e){return m}})}
+  var S=[
+   {t:"Scene parsing and planning",h:"Scene parsing and construction planning",d:"Three experts read the images and 3DGS scene and produce a construction plan: which objects exist, where they are, and whether to build or generate each one.",img:["pipe_plan.png","Construction plan"],
+    lanes:[
+     {n:"Layout & large furniture expert",c:[["v","Shell measurement"],["a"],["dt","Room shell"]]},
+     {n:"",c:[["v","Large furniture inspection"],["a"],["dt","Object list $\\mathcal{O}_L$"]]},
+     {n:"Inventory expert",c:[["v","Detection"],["a"],["s","Segment, lift"],["a"],["v","Grouping"],["a"],["dt","Object list $\\mathcal{O}_E$"]],im:"pipe_inv.jpg"},
+     {n:"Audit expert",c:[["v","Inventory review"],["a"],["v","3D box measurement"],["a"],["dt","Construction plan $\\mathcal{P}$"]]}]},
+   {t:"Route-aware construction",h:"Route-aware construction",d:"Each planned object follows its route. Generated objects are verified in the scene; failures return to the 3DGS observations instead of being accepted.",img:["pipe_assembled.png","Assembled scene"],
+    lanes:[
+     {n:"Generate route",c:[["v","View selection"],["a"],["s","Generation"],["a"],["p","Placement"],["a"],["dia","Joint verification"],["a","pass"],["p","Final assembly"]]},
+     {n:"Build route",c:[["v","Measurement"],["a"],["p","Procedural geometry"],["a"],["p","Final assembly"]]}],
+    fb:["Mesh error: reselect view, regenerate","Pose error: remeasure","No attempt passed: procedural fallback (VLM)"]},
+   {t:"Geometric repair",h:"Geometric repair",d:"The assembled scene is checked for physical problems and repaired.",img:["pipe_assembled.png","Assembled scene"],
+    lanes:[{n:"Repairs",c:[["p","Detached"],["p","Floating"],["p","Intersecting"]]}]},
+   {t:"Texturing and export",h:"Texturing and export",d:"Materials are reasoned from the observations, colors are matched and checked, and the scene is exported as editable assets.",img:["pipe_editable.png","Editable scene"],
+    lanes:[{n:"Materials",c:[["v","Material reasoning"],["a"],["v","Tone check, refine"]]},{n:"Colors and export",c:[["p","Color matching"],["a"],["p","3DGS color transfer"],["a"],["p","Export"]]}]}
+  ];
+  var st=document.getElementById('pst'),pn=document.getElementById('ppanel'),pg=document.getElementById('pprog'),cur=0,tabs=[];
+  S.forEach(function(s,i){var b=document.createElement('button');b.className='pst';b.setAttribute('role','tab');b.innerHTML='<i>'+(i+1)+'</i><b>'+s.t+'</b>';b.onclick=function(){show(i)};st.appendChild(b);tabs.push(b)});
+  function show(i){
+    cur=i;tabs.forEach(function(b,k){b.setAttribute('aria-selected',k===i?'true':'false')});
+    pg.style.marginLeft=(i*100)+'%';
+    var s=S[i],k=0,o='<div><h3>'+(i+1)+' · '+s.h+'</h3><p class="d">'+s.d+'</p>';
+    function dl(){return 'style="animation-delay:'+(k++*70)+'ms"'}
+    s.lanes.forEach(function(l){
+      o+='<div class="lane">'+(l.n?'<h4>'+l.n+'</h4>':'')+'<div class="chain">';
+      l.c.forEach(function(x){
+        if(x[0]==='a')o+='<span class="cn" '+dl()+'>'+(x[1]?'<small>'+x[1]+' </small>':'')+'&rarr;</span>';
+        else if(x[0]==='dt')o+='<span class="dt" '+dl()+'>'+tx(x[1])+'</span>';
+        else o+='<span class="nd '+x[0]+'" '+dl()+'>'+x[1]+'</span>';
+      });
+      o+='</div>'+(l.im?'<img src="assets/'+l.im+'" alt="" style="margin-top:8px;max-width:100%;height:auto;border-radius:6px;background:#fff;max-height:64px">':'')+'</div>';
+    });
+    if(s.fb){o+='<div class="fbs">';s.fb.forEach(function(f){o+='<span class="fb" '+dl()+'>'+f+'</span>'});o+='</div>'}
+    o+='</div><div class="pside"><img src="assets/'+s.img[0]+'" alt="'+s.img[1]+'"><span>'+s.img[1]+'</span></div>';
+    pn.innerHTML=o;
+  }
+  st.addEventListener('keydown',function(e){if(e.key==='ArrowRight'){show((cur+1)%4);tabs[cur].focus()}if(e.key==='ArrowLeft'){show((cur+3)%4);tabs[cur].focus()}});
+  show(0);
+})();
+</script>
+
+</body>
+</html>
