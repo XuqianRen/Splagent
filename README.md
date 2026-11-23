@@ -12,7 +12,7 @@
   <a href="#"><img src="https://img.shields.io/badge/Paper-PDF_coming_soon-lightgrey" alt="Paper"></a>
   <a href="#"><img src="https://img.shields.io/badge/Demo-coming_soon-ff0000" alt="Demo"></a>
   <a href="#"><img src="https://img.shields.io/badge/Code-coming_soon-lightgrey" alt="Code"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Data-coming_soon-yellow" alt="Data"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Dataset-coming_soon-yellow" alt="Dataset"></a>
 </p>
 
 </div>
@@ -25,7 +25,7 @@
 
 ## News
 
-- **2026/11** Project page online. Code, data and evaluation scripts will be released after cleanup.
+- **2026/11** Project page online. Code, dataset and evaluation scripts will be released after cleanup.
 
 ## Introduction
 
@@ -60,8 +60,6 @@ Building a scene-wide object inventory means reconciling partial observations ac
 - [x] Project page
 - [ ] arXiv / paper PDF
 - [ ] Pipeline code
-- [ ] Evaluation scripts and Kosmo data
-- [ ] Demo video
 
 ## Quick Start
 
