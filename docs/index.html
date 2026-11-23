@@ -133,7 +133,7 @@ footer{padding:36px 0 60px;color:var(--muted);font-size:14px;text-align:center;b
   <div class="btns">
     <a class="btn off" href="#">Paper (soon)</a>
     <a class="btn off" href="#">arXiv (soon)</a>
-    <a class="btn off" href="#">Code (soon)</a>
+    <a class="btn" href="https://github.com/XuqianRen/Splagent" target="_blank" rel="noopener">Code</a>
   </div>
 </header>
 
@@ -185,7 +185,7 @@ dialog.tz-dlg::backdrop{background:rgba(10,14,16,.6);backdrop-filter:blur(3px)}
       <figure><div class="cr" data-c="10,62,272,205"></div>ShapeR</figure>
       <figure><div class="cr" data-c="284,62,268,205"></div>Fire3D</figure>
       <figure><div class="cr" data-c="14,332,264,200"></div>LiteReality-Agent</figure>
-      <figure><div class="cr" data-c="284,332,268,200"></div>GPT Astra</figure>
+      <figure><div class="cr" data-c="284,332,268,200"></div>GPT-6 Astra</figure>
     </div>
     <h3>Objects correctly found</h3>
     <div class="tz-bars" id="tzb"></div>
@@ -219,7 +219,7 @@ dialog.tz-dlg::backdrop{background:rgba(10,14,16,.6);backdrop-filter:blur(3px)}
   dlg.addEventListener('click',function(e){if(e.target===dlg||e.target.className==='x')dlg.close()});
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!reduce){var r=st.parentNode;r.addEventListener('mousemove',function(e){var b=r.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;st.style.transform='rotateY('+(x*3)+'deg) rotateX('+(-y*3)+'deg)'});r.addEventListener('mouseleave',function(){st.style.transform=''})}
-  var D=[['Fire3D',26,0],['LiteReality-Agent',28,0],['ShapeR',32,1],['WorldSculpt',40,1],['GPT Astra',43,1],['Ours',104,29]],box=document.getElementById('tzb');
+  var D=[['Fire3D',26,0],['LiteReality-Agent',28,0],['ShapeR',32,1],['WorldSculpt',40,1],['GPT-6 Astra',43,1],['Ours',104,29]],box=document.getElementById('tzb');
   D.forEach(function(d){var o=d[0]=='Ours',e=document.createElement('div');e.className='tz-bar'+(o?' ours':'');e.innerHTML='<span>'+d[0]+'</span><div><i data-w="'+d[1]/104*100+'" data-s="'+d[2]/104*100+'"><b></b></i></div><em data-n="'+d[1]+'">0</em>';box.appendChild(e)});
   function count(el){var n=+el.dataset.n,t=0,s=performance.now();if(reduce){el.textContent=n;return}(function f(now){t=Math.min(1,(now-s)/1100);el.textContent=Math.round(n*(1-Math.pow(1-t,3)));if(t<1)requestAnimationFrame(f)})(s)}
   function play(){document.querySelectorAll('#tzb i').forEach(function(i){i.style.width=i.dataset.w+'%';i.firstChild.style.width=(i.dataset.s/i.dataset.w*100)+'%'});document.querySelectorAll('#tz [data-n]').forEach(count)}
@@ -282,9 +282,9 @@ dialog.tz-dlg::backdrop{background:rgba(10,14,16,.6);backdrop-filter:blur(3px)}
 <section id="topdown">
   <div class="eyebrow">02 &middot; SCENE LAYOUT</div>
   <h2>Top-down views</h2>
-  <p style="color:var(--muted);font-size:15px">Orthographic top-down layouts of the same scenes: the input 3DGS, GPT Astra, LiteReality-Agent, and ours.</p>
+  <p style="color:var(--muted);font-size:15px">Orthographic top-down layouts of the same scenes: the input 3DGS, GPT-6 Astra, LiteReality-Agent, and ours.</p>
   <div class="tabs" role="tablist" id="tdtabs"><button class="tab" role="tab" data-case="5" aria-selected="true">ScanNet++ &middot; Scene 1</button><button class="tab" role="tab" data-case="6" aria-selected="false">ScanNet++ &middot; Scene 2</button><button class="tab" role="tab" data-case="2" aria-selected="false">KReal &middot; Scene 1</button><button class="tab" role="tab" data-case="7" aria-selected="false">KReal &middot; Scene 2</button></div>
-  <div class="grid g4" id="tdgrid"><figure><img data-k="3dgs" src="assets/topdown_case5_3dgs.jpg" alt="Input 3DGS"><figcaption>Input 3DGS</figcaption></figure><figure><img data-k="without" src="assets/topdown_case5_without.jpg" alt="GPT Astra"><figcaption>GPT Astra</figcaption></figure><figure><img data-k="lra" src="assets/topdown_case5_lra.jpg" alt="LiteReality-Agent"><figcaption>LiteReality-Agent</figcaption></figure><figure><img data-k="ours" src="assets/topdown_case5_ours.jpg" alt="Ours"><figcaption>Ours</figcaption></figure></div>
+  <div class="grid g4" id="tdgrid"><figure><img data-k="3dgs" src="assets/topdown_case5_3dgs.jpg" alt="Input 3DGS"><figcaption>Input 3DGS</figcaption></figure><figure><img data-k="without" src="assets/topdown_case5_without.jpg" alt="GPT-6 Astra"><figcaption>GPT-6 Astra</figcaption></figure><figure><img data-k="lra" src="assets/topdown_case5_lra.jpg" alt="LiteReality-Agent"><figcaption>LiteReality-Agent</figcaption></figure><figure><img data-k="ours" src="assets/topdown_case5_ours.jpg" alt="Ours"><figcaption>Ours</figcaption></figure></div>
 </section>
 
 <section id="meshes">

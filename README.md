@@ -7,10 +7,9 @@
 **Official repository for the paper**
 
 <p>
-  <a href="https://XuqianRen.github.io/splagent"><img src="https://img.shields.io/badge/Project_Page-online-green" alt="Project Page"></a>
+  <a href="https://xuqianren.github.io/Splagent/"><img src="https://img.shields.io/badge/Project_Page-online-green" alt="Project Page"></a>
   <a href="#"><img src="https://img.shields.io/badge/arXiv-coming_soon-b31b1b" alt="arXiv"></a>
   <a href="#"><img src="https://img.shields.io/badge/Paper-PDF_coming_soon-lightgrey" alt="Paper"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Demo-coming_soon-ff0000" alt="Demo"></a>
   <a href="#"><img src="https://img.shields.io/badge/Code-coming_soon-lightgrey" alt="Code"></a>
   <a href="#"><img src="https://img.shields.io/badge/Dataset-coming_soon-yellow" alt="Dataset"></a>
 </p>
