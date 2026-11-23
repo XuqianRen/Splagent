@@ -24,7 +24,7 @@
 
 ## News
 
-- **2026/11** Project page online. Code, dataset and evaluation scripts will be released after cleanup.
+- **2026/11** Project page online. Code and dataset will be released after cleanup.
 
 ## Introduction
 
