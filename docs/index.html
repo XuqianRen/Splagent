@@ -148,6 +148,8 @@ footer{padding:36px 0 60px;color:var(--muted);font-size:14px;text-align:center;b
 .tz h3{margin:0;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .tz-th{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tz-th figure{margin:0;text-align:center;font-size:12.5px;color:var(--muted)}
+.tz-th figure img{width:100%;height:auto;display:block;margin:0 auto 4px;border:0;border-radius:0;background:transparent}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tz-th figure img{background:#e9edef;border-radius:10px;padding:4px;box-sizing:border-box}}
 .tz-th .cr{width:100%;border-radius:8px;background-color:#fff;border:1px solid var(--line)}
 .cr{background-image:url(assets/teaser.png);background-repeat:no-repeat}
 .tz-bars{display:flex;flex-direction:column;gap:7px}
@@ -160,22 +162,34 @@ footer{padding:36px 0 60px;color:var(--muted);font-size:14px;text-align:center;b
 .tz-small{margin-top:auto;border-radius:12px;background:#f6e7e3;color:#8a4a3a;padding:10px 14px;font-size:14px}
 .tz-small b{font-size:22px;font-variant-numeric:tabular-nums}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tz-small{background:#3a2824;color:#e8b4a4}}
-.tz-r{position:relative;background:#fff;perspective:1400px}
+.tz-r{position:relative;perspective:1400px;padding:16px 16px 12px;display:flex;flex-direction:column;gap:10px}
 .tz-stage{position:relative;transition:transform .25s ease-out;transform-style:preserve-3d;will-change:transform}
-.tz-stage{container-type:inline-size}.tz-stage .cr{width:100%;display:block}
-.tz-ttl{position:absolute;left:43.2%;width:13.4%;top:.4%;height:5.5%;background:#446e64;color:#fff;display:flex;align-items:center;justify-content:center;font:700 2.25cqw/1 Helvetica,Arial,sans-serif;pointer-events:none}
+.tz-stage img{width:100%;height:auto;display:block;border:0;border-radius:0;background:transparent}
 .tz-hs{position:absolute;border:2px solid transparent;border-radius:12px;cursor:pointer;background:transparent;padding:0;transition:box-shadow .2s,border-color .2s,background .2s}
 .tz-hs:hover,.tz-hs:focus-visible{border-color:#3f6b5c;box-shadow:0 0 0 4px rgba(63,107,92,.22),0 10px 30px rgba(0,0,0,.18);background:rgba(63,107,92,.06);outline:none}
 .tz-hs span{position:absolute;right:8px;bottom:8px;background:#3f6b5c;color:#fff;font-size:11.5px;line-height:1;padding:5px 9px;border-radius:999px;opacity:0;transform:translateY(4px);transition:.2s;pointer-events:none}
 .tz-hs:hover span,.tz-hs:focus-visible span{opacity:1;transform:none}
-.tz-hint{position:absolute;left:14px;bottom:12px;font-size:12.5px;background:rgba(26,29,31,.78);color:#fff;padding:5px 12px;border-radius:999px;pointer-events:none;animation:tzp 2.4s ease-in-out infinite}
+.tz-hint{position:absolute;right:16px;top:14px;font-size:12.5px;background:rgba(26,29,31,.78);color:#fff;padding:5px 12px;border-radius:999px;pointer-events:none;animation:tzp 2.4s ease-in-out infinite}
 @keyframes tzp{50%{opacity:.55}}
 .tz-reveal{opacity:0;transform:translateY(14px);transition:opacity .7s,transform .7s}
 .tz-reveal.on{opacity:1;transform:none}
 dialog.tz-dlg{border:0;border-radius:16px;padding:0;max-width:min(92vw,880px);width:100%;background:var(--bg);color:var(--fg);box-shadow:0 30px 80px rgba(0,0,0,.4)}
 dialog.tz-dlg::backdrop{background:rgba(10,14,16,.6);backdrop-filter:blur(3px)}
-.tz-dlg .cr{width:100%;background-color:#fff}
-.tz-dlg .bd{padding:16px 20px 20px}.tz-dlg h4{margin:0 0 4px;font-size:18px}.tz-dlg p{margin:0;color:var(--muted);font-size:15px}
+.tz-dlg .hd{display:flex;align-items:center;gap:14px;padding:18px 56px 18px 22px;background:linear-gradient(135deg,#3d6a5d,#5d8b7e);color:#fff}
+.tz-dlg .hd .bg{flex:0 0 auto;width:40px;height:40px;border-radius:50%;background:#fff;color:#3d6a5d;font:700 22px/40px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-align:center}
+.tz-dlg h4{margin:0;font-size:18px;line-height:1.3}.tz-dlg .hd small{display:block;opacity:.85;font-size:13.5px;margin-top:2px}
+.tz-dlg .flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px;padding:30px 22px 20px;background:var(--card)}
+.tz-dlg .st{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:translateY(10px);animation:tzin .5s cubic-bezier(.2,.8,.2,1) forwards}
+.tz-dlg .st .im{position:relative;border-radius:12px;background:#fff;border:1px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.08);padding:6px}
+.tz-dlg .st .im img{display:block;height:170px;width:auto;border-radius:8px;margin:0;border:0}
+.tz-dlg .st .im.grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}.tz-dlg .st .im.grid img{height:auto;width:96px}
+.tz-dlg .st .im i{position:absolute;top:-9px;right:-9px;width:26px;height:26px;border-radius:50%;color:#fff;font:700 14px/26px sans-serif;text-align:center;font-style:normal;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.tz-dlg .st .im i.ok{background:#3f9a73}.tz-dlg .st .im i.bad{background:#d0705c}
+.tz-dlg .cap{font-size:13.5px;color:var(--fg);text-align:center;max-width:190px;line-height:1.35}
+.tz-dlg .ar{color:var(--muted);font-size:26px;opacity:0;animation:tzin .4s forwards}
+@keyframes tzin{to{opacity:1;transform:none}}
+.tz-dlg .note{margin:0;padding:8px 26px 24px;background:var(--card);font-size:15px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion: reduce){.tz-dlg .st,.tz-dlg .ar{animation:none;opacity:1;transform:none}}
 .tz-dlg button.x{position:absolute;right:10px;top:10px;border:0;background:rgba(0,0,0,.55);color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer}
 @media(max-width:820px){.tz{grid-template-columns:1fr}.tz-hint{display:none}}
 @media (prefers-reduced-motion: reduce){.tz-stage,.tz-bar i,.tz-bar i b,.tz-reveal{transition:none}.tz-hint{animation:none}}
@@ -184,10 +198,10 @@ dialog.tz-dlg::backdrop{background:rgba(10,14,16,.6);backdrop-filter:blur(3px)}
   <div class="tz-l tz-reveal"><div class="tz-li" id="tzli">
     <h3>Compared methods</h3>
     <div class="tz-th">
-      <figure><div class="cr" data-c="10,62,272,205"></div>ShapeR</figure>
-      <figure><div class="cr" data-c="284,62,268,205"></div>Fire3D</figure>
-      <figure><div class="cr" data-c="14,332,264,200"></div>LiteReality-Agent</figure>
-      <figure><div class="cr" data-c="284,332,268,200"></div>GPT-6 Astra</figure>
+      <figure><img src="assets/th_shaper.png" alt="ShapeR">ShapeR</figure>
+      <figure><img src="assets/th_fire3d.png" alt="Fire3D">Fire3D</figure>
+      <figure><img src="assets/th_lra.png" alt="LiteReality-Agent">LiteReality-Agent</figure>
+      <figure><img src="assets/th_gpt.png" alt="GPT-6 Astra">GPT-6 Astra</figure>
     </div>
     <h3>Objects correctly found</h3>
     <div class="tz-bars" id="tzb"></div>
@@ -195,28 +209,40 @@ dialog.tz-dlg::backdrop{background:rgba(10,14,16,.6);backdrop-filter:blur(3px)}
     <div class="tz-small">Small objects only &mdash; found: <b data-n="1">0</b> at most; ours <b data-n="29">0</b></div>
   </div></div>
   <div class="tz-r tz-reveal">
-    <div class="tz-stage" id="tzs"><div class="cr" data-c="570,0,1722,1067" id="tzm"></div><div class="tz-ttl">Splagent</div></div>
+    <h3>Splagent</h3>
+    <div class="tz-stage" id="tzs"><img src="assets/tz_scene.png" alt="Splagent overview: inputs, object search and construction, with four zoomable examples" id="tzm"></div>
     <div class="tz-hint">Click a panel to zoom in</div>
   </div>
 </div>
-<dialog class="tz-dlg" id="tzd"><button class="x" aria-label="Close">&times;</button><div class="cr" id="tzdc"></div><div class="bd"><h4 id="tzdt"></h4><p id="tzdp"></p></div></dialog>
+<dialog class="tz-dlg" id="tzd"><button class="x" aria-label="Close">&times;</button><div class="hd"><span class="bg" id="tzdb"></span><div><h4 id="tzdt"></h4><small id="tzds"></small></div></div><div class="flow" id="tzdf"></div><p class="note" id="tzdp"></p></dialog>
 <script>
 (function(){
   var W=2292,H=1067;
   function crop(el,r){el.style.aspectRatio=r[2]+'/'+r[3];el.style.backgroundSize=(W/r[2]*100)+'% auto';el.style.backgroundPosition=(W>r[2]?r[0]/(W-r[2])*100:0)+'% '+(H>r[3]?r[1]/(H-r[3])*100:0)+'%'}
   document.querySelectorAll('#tz .cr[data-c]').forEach(function(e){crop(e,e.dataset.c.split(',').map(Number))});
-  var X0=570,SW=1722;
+  var X0=576,Y0=63,SW=1708,SH=997;
   var P=[
-   {k:'a',r:[1090,75,485,260],t:'a · Procedural fallback',p:'A generated lamp comes out too wide for the photo, so the system falls back to procedural construction, which matches the observation.'},
-   {k:'b',r:[1888,75,374,225],t:'b · Small object (17 cm)',p:'A small object found in a close-up is rebuilt and checked against the photo.'},
-   {k:'c',r:[1090,795,505,260],t:'c · Wrong mesh: reselect views',p:'Attempt 1 produced an extra sheet; the agent reselects the views and attempt 2 removes it.'},
-   {k:'d',r:[1667,795,580,260],t:'d · Views rendered from the GS: pass',p:'Four GS renders with masks drive the generated mesh, which then matches the same camera view.'}];
-  var st=document.getElementById('tzs'),dlg=document.getElementById('tzd'),dc=document.getElementById('tzdc');
+   {k:'a',r:[1090,75,485,260],t:'Procedural fallback',sub:'The generated asset fails the check; the procedural build passes',p:'A generated lamp comes out too wide for the photo, so the system falls back to procedural construction, which matches the observation.',
+    steps:[{i:'ex/a_photo.jpg',l:'photo'},{i:'ex/a_gen.jpg',l:'generated: too wide',s:'bad'},{i:'ex/a_proc.jpg',l:'procedural: matches',s:'ok'}]},
+   {k:'b',r:[1888,75,374,225],t:'Small object (17 cm)',sub:'A small object found in a close-up is rebuilt',p:'A small object found in a close-up is rebuilt and checked against the photo.',
+    steps:[{i:'ex/b_photo.jpg',l:'photo'},{i:'ex/b_ours.jpg',l:'ours',s:'ok'}]},
+   {k:'c',r:[1090,795,505,260],t:'Wrong mesh: reselect views',sub:'A failed attempt triggers new views and a retry',p:'Attempt 1 produced an extra sheet; the agent reselects the views and attempt 2 removes it.',
+    steps:[{i:'ex/c_photo.jpg',l:'photo'},{i:'ex/c_att1.png',l:'attempt 1: extra sheet',s:'bad'},{i:'ex/c_att2.png',l:'attempt 2: sheet gone',s:'ok'}]},
+   {k:'d',r:[1667,795,580,260],t:'Views rendered from the GS: pass',sub:'The mesh is verified at the same camera as the observation',p:'Four GS renders with masks drive the generated mesh, which then matches the same camera view.',
+    steps:[{g:['ex/d_gs1.jpg','ex/d_gs2.jpg','ex/d_gs3.jpg','ex/d_gs4.jpg'],l:'4 GS renders with masks'},{i:'ex/d_mesh.png',l:'generated mesh',h:130},{i:'ex/d_cam.jpg',l:'same camera: matches',s:'ok'}]}];
+  var st=document.getElementById('tzs'),dlg=document.getElementById('tzd');
   P.forEach(function(o){
-    var b=document.createElement('button');b.className='tz-hs';b.setAttribute('aria-label',o.t);
-    b.style.cssText='left:'+((o.r[0]-X0)/SW*100)+'%;top:'+(o.r[1]/H*100)+'%;width:'+(o.r[2]/SW*100)+'%;height:'+(o.r[3]/H*100)+'%';
+    var b=document.createElement('button');b.className='tz-hs';b.setAttribute('aria-label',o.k+' · '+o.t);
+    b.style.cssText='left:'+((o.r[0]-X0)/SW*100)+'%;top:'+((o.r[1]-Y0)/SH*100)+'%;width:'+(o.r[2]/SW*100)+'%;height:'+(o.r[3]/SH*100)+'%';
     b.innerHTML='<span>Zoom &#8599;</span>';
-    b.onclick=function(){crop(dc,o.r);document.getElementById('tzdt').textContent=o.t;document.getElementById('tzdp').textContent=o.p;if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','')};
+    b.onclick=function(){
+      document.getElementById('tzdb').textContent=o.k;document.getElementById('tzdt').textContent=o.t;document.getElementById('tzds').textContent=o.sub;document.getElementById('tzdp').textContent=o.p;
+      var h='';o.steps.forEach(function(x,i){
+        if(i)h+='<span class="ar" style="animation-delay:'+(i*130-70)+'ms">&rarr;</span>';
+        h+='<div class="st" style="animation-delay:'+(i*130)+'ms"><div class="im'+(x.g?' grid':'')+'">'+(x.g?x.g.map(function(u){return '<img src="assets/'+u+'" alt="">'}).join(''):'<img src="assets/'+x.i+'" alt="'+x.l+'"'+(x.h?' style="height:'+x.h+'px"':'')+'>')+(x.s?'<i class="'+x.s+'">'+(x.s==='ok'?'&#10003;':'&#10005;')+'</i>':'')+'</div><div class="cap">'+x.l+'</div></div>';
+      });
+      document.getElementById('tzdf').innerHTML=h;
+      if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','')};
     st.appendChild(b)});
   dlg.addEventListener('click',function(e){if(e.target===dlg||e.target.className==='x')dlg.close()});
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
